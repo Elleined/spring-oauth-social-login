@@ -100,7 +100,7 @@ public class SocialUserServiceImpl implements SocialUserService {
             SocialUser.Provider provider = getProvider(userRequest);
 
             if (isEmailAlreadyExists(email))
-                return getByEmail(email);
+                return this.getByEmail(email);
 
             return this.save(email, name, image, socialId, nickname, authorities, provider);
         };

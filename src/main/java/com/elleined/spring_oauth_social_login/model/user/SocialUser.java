@@ -69,6 +69,6 @@ public class SocialUser extends User implements OidcUser {
     }
 
     public enum Provider {
-        GITHUB, GOOGLE
+        GITHUB, GOOGLE, FACEBOOK, TWITTER, INSTAGRAM
     }
 }
