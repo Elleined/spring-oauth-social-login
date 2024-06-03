@@ -1,5 +1,8 @@
-package com.elleined.spring_oauth_social_login.model;
+package com.elleined.spring_oauth_social_login.model.authority;
 
+import com.elleined.spring_oauth_social_login.model.PrimaryKeyIdentity;
+import com.elleined.spring_oauth_social_login.model.user.DBUser;
+import com.elleined.spring_oauth_social_login.model.user.SocialUser;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,7 +30,7 @@ public class Authority extends PrimaryKeyIdentity implements GrantedAuthority {
 
     @ManyToMany
     @JoinTable(
-            name = "tbl_user_authority",
+            name = "tbl_db_user_authority",
             joinColumns = @JoinColumn(
                     name = "authority_id",
                     referencedColumnName = "id",
@@ -39,7 +42,23 @@ public class Authority extends PrimaryKeyIdentity implements GrantedAuthority {
                     nullable = false
             )
     )
-    private Set<User> users;
+    private Set<DBUser> dbUsers;
+
+    @ManyToMany
+    @JoinTable(
+            name = "tbl_social_user_authority",
+            joinColumns = @JoinColumn(
+                    name = "authority_id",
+                    referencedColumnName = "id",
+                    nullable = false
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "user_id",
+                    referencedColumnName = "id",
+                    nullable = false
+            )
+    )
+    private Set<SocialUser> socialUsers;
 
     @Override
     public String getAuthority() {

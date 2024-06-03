@@ -1,6 +1,7 @@
 package com.elleined.spring_oauth_social_login.mapper;
 
-import com.elleined.spring_oauth_social_login.model.User;
+import com.elleined.spring_oauth_social_login.model.user.DBUser;
+import com.elleined.spring_oauth_social_login.model.user.SocialUser;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -15,28 +16,32 @@ public interface UserMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "email", source = "email"),
-            @Mapping(target = "password", source = "password"),
             @Mapping(target = "name", source = "name"),
-            @Mapping(target = "imageUrl", source = "imageUrl"),
-            @Mapping(target = "authorities", source = "authorities"),
+            @Mapping(target = "image", source = "image"),
+            @Mapping(target = "authorities", expression = "java(new java.util.HashSet<>())"),
+            @Mapping(target = "password", source = "password")
     })
-    User toEntity(String email,
-                  String password,
-                  String name,
-                  String imageUrl,
-                  Collection<? extends GrantedAuthority> authorities); // Save user from OAuth
+    DBUser toEntity(String email,
+                    String password,
+                    String name,
+                    String image);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())"),
             @Mapping(target = "email", source = "email"),
-            @Mapping(target = "password", source = "password"),
             @Mapping(target = "name", source = "name"),
-            @Mapping(target = "imageUrl", source = "imageUrl"),
-            @Mapping(target = "authorities", expression = "java(new java.util.HashSet<>())"),
+            @Mapping(target = "image", source = "image"),
+            @Mapping(target = "authorities", source = "authorities"),
+            @Mapping(target = "socialId", source = "socialId"),
+            @Mapping(target = "nickname", source = "nickname"),
+            @Mapping(target = "provider", source = "provider")
     })
-    User toEntity(String email,
-                  String password,
-                  String name,
-                  String imageUrl); // Save user from Form
+    SocialUser toEntity(String email,
+                        String name,
+                        String image,
+                        String socialId,
+                        String nickname,
+                        Collection<? extends GrantedAuthority> authorities,
+                        SocialUser.Provider provider);
 }

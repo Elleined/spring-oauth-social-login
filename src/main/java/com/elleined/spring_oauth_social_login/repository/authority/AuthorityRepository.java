@@ -1,6 +1,6 @@
-package com.elleined.spring_oauth_social_login.repository;
+package com.elleined.spring_oauth_social_login.repository.authority;
 
-import com.elleined.spring_oauth_social_login.model.Authority;
+import com.elleined.spring_oauth_social_login.model.authority.Authority;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

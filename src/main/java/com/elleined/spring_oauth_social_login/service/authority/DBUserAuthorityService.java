@@ -2,10 +2,10 @@ package com.elleined.spring_oauth_social_login.service.authority;
 
 import com.elleined.spring_oauth_social_login.exception.resource.ResourceNotFoundException;
 import com.elleined.spring_oauth_social_login.mapper.AuthorityMapper;
-import com.elleined.spring_oauth_social_login.model.Authority;
-import com.elleined.spring_oauth_social_login.model.User;
-import com.elleined.spring_oauth_social_login.repository.AuthorityRepository;
-import com.elleined.spring_oauth_social_login.repository.UserRepository;
+import com.elleined.spring_oauth_social_login.model.authority.Authority;
+import com.elleined.spring_oauth_social_login.model.user.DBUser;
+import com.elleined.spring_oauth_social_login.repository.authority.AuthorityRepository;
+import com.elleined.spring_oauth_social_login.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,14 @@ import java.util.List;
 @Transactional
 @Service
 @Slf4j
-public class AuthorityServiceImpl implements AuthorityService {
-    private final UserRepository userRepository;
+public class DBUserAuthorityService implements AuthorityService<DBUser> {
+    private final UserRepository<DBUser> userRepository;
 
     private final AuthorityRepository authorityRepository;
     private final AuthorityMapper authorityMapper;
 
     @Override
     public Authority save(String authority) {
-        if (isAlreadyExists(authority))
-            return getByAuthority(authority);
-
         Authority savedAuthority = authorityMapper.toEntity(authority);
 
         authorityRepository.save(savedAuthority);
@@ -48,8 +45,9 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public void add(User currentUser, Authority authority) {
-        currentUser.addAuthority(authority);
+    public void add(DBUser currentUser, Authority authority) {
+        currentUser.getAuthorities().add(authority);
+        authority.getDbUsers().add(currentUser);
 
         userRepository.save(currentUser);
         authorityRepository.save(authority);
@@ -57,15 +55,18 @@ public class AuthorityServiceImpl implements AuthorityService {
     }
 
     @Override
-    public void remove(User currentUser, Authority authority) {
+    public void remove(DBUser currentUser, Authority authority) {
         currentUser.getAuthorities().remove(authority);
-        authority.getUsers().remove(currentUser);
+        authority.getDbUsers().remove(currentUser);
+
+        userRepository.save(currentUser);
+        authorityRepository.save(authority);
         log.debug("Removing authority {} to current user with id of {} success", authority.getAuthority(), currentUser.getId());
     }
 
     @Override
-    public void addAll(User currentUser, List<Authority> authorities) {
-        currentUser.mergeAuthorities(authorities);
+    public void addAll(DBUser currentUser, List<Authority> authorities) {
+        currentUser.getAuthorities().addAll(authorities);
 
         userRepository.save(currentUser);
         log.debug("Merging authorities ");

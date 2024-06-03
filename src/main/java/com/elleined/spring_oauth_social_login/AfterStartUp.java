@@ -1,6 +1,6 @@
 package com.elleined.spring_oauth_social_login;
 
-import com.elleined.spring_oauth_social_login.service.user.UserService;
+import com.elleined.spring_oauth_social_login.service.user.db.DBUserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AfterStartUp {
 
-    private final UserService userService;
+    private final DBUserService userService;
 
     @PostConstruct
     void addDefaultUsers() {
