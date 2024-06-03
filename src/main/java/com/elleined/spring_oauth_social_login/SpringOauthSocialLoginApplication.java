@@ -1,5 +1,6 @@
 package com.elleined.spring_oauth_social_login;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

@@ -7,10 +7,7 @@ import com.elleined.spring_oauth_social_login.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
@@ -24,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -53,7 +49,6 @@ public class UserServiceImpl implements UserService {
             System.out.println(oidcUser);
 
             String email = oidcUser.getEmail();
-            String password = UUID.randomUUID().toString();
             String name = oidcUser.getFullName();
             String picture = oidcUser.getPicture();
             Collection<? extends GrantedAuthority> authorities = oidcUser.getAuthorities();
@@ -61,7 +56,7 @@ public class UserServiceImpl implements UserService {
             if (isEmailAlreadyExists(email))
                 return getByEmail(email);
 
-            return this.save(password, email, name, picture, authorities);
+            return this.save(email, name, picture, authorities);
         };
     }
 
@@ -78,7 +73,6 @@ public class UserServiceImpl implements UserService {
             System.out.println(oAuth2User);
 
             String email = oAuth2User.getAttribute("email");
-            String password = UUID.randomUUID().toString();
             String name = oAuth2User.getAttribute("name");
             String picture = oAuth2User.getAttribute("avatar_url");
             Collection<? extends GrantedAuthority> authorities = oAuth2User.getAuthorities();
@@ -86,66 +80,23 @@ public class UserServiceImpl implements UserService {
             if (isEmailAlreadyExists(email))
                 return getByEmail(email);
 
-            return this.save(password, email, name, picture, authorities);
+            return this.save(email, name, picture, authorities);
         };
     }
 
     @Override
-    public void changePassword(String oldPassword, String newPassword) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        UserDetails currentUser = (UserDetails) authentication.getPrincipal();
-
-        if (!passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
-            throw new IllegalArgumentException("Old password is not correct!");
-        }
-
-        String email = currentUser.getUsername();
-        userRepository.findByEmail(email)
-                .ifPresent(cu -> cu.setPassword(passwordEncoder.encode(newPassword)));
-    }
-
-    @Override
-    public boolean userExists(String username) {
-        return userRepository.findAll().stream()
-                .map(User::getEmail)
-                .anyMatch(username::equalsIgnoreCase);
-    }
-
-    // username alias for id
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User with email of " + username + " doesn't exists!"));
-    }
-
-
-    @Override
-    public void createUser(UserDetails userDetails) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void updateUser(UserDetails user) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteUser(String username) {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Override
-    public User save(String password, String email, String name, String imageUrl, Collection<? extends GrantedAuthority> authorities) {
-        User user = userMapper.toEntity(password, email, name, imageUrl, authorities);
+    public User save(String email, String name, String imageUrl, Collection<? extends GrantedAuthority> authorities) {
+        String encodedPassword = passwordEncoder.encode(UUID.randomUUID().toString());
+        User user = userMapper.toEntity(email, encodedPassword, name, imageUrl, authorities);
         userRepository.save(user);
         log.debug("Saving user success");
         return user;
     }
 
     @Override
-    public User save(String password, String email, String name, String imageUrl) {
-        User user = userMapper.toEntity(password, email, name, imageUrl);
+    public User save(String email, String password, String name, String imageUrl) {
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = userMapper.toEntity(email, encodedPassword, name, imageUrl);
         userRepository.save(user);
         log.debug("Saving user success");
         return user;
@@ -161,5 +112,10 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll().stream()
                 .map(User::getEmail)
                 .anyMatch(email::equalsIgnoreCase);
+    }
+
+    @Override
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User with email of " + username + " doesn't exists!"));
     }
 }

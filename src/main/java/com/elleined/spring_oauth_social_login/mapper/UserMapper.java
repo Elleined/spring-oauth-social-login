@@ -20,8 +20,8 @@ public interface UserMapper {
             @Mapping(target = "imageUrl", source = "imageUrl"),
             @Mapping(target = "authorities", source = "authorities"),
     })
-    User toEntity(String password,
-                  String email,
+    User toEntity(String email,
+                  String password,
                   String name,
                   String imageUrl,
                   Collection<? extends GrantedAuthority> authorities); // Save user from OAuth
@@ -35,8 +35,8 @@ public interface UserMapper {
             @Mapping(target = "imageUrl", source = "imageUrl"),
             @Mapping(target = "authorities", expression = "java(new java.util.HashSet<>())"),
     })
-    User toEntity(String password,
-                  String email,
+    User toEntity(String email,
+                  String password,
                   String name,
                   String imageUrl); // Save user from Form
 }
