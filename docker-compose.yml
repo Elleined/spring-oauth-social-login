@@ -1,0 +1,39 @@
+version: "3"
+services:
+  spring_oauth_social_login_app:
+    build: .
+    image: elleined/spring-oauth-social-login
+    container_name: spring_oauth_social_login_app
+    restart: always
+    ports:
+      - "8087:8087"
+    environment:
+      - MYSQL_HOST=mysql_server
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=spring_oauth_social_login_db
+      - PORT=8087
+    networks:
+      - spring_oauth_social_login_network
+    depends_on:
+      mysql_server:
+        condition: service_healthy
+  mysql_server:
+    image: mysql:8.0.32
+    container_name: mysql_server
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=spring_oauth_social_login_db
+    healthcheck:
+      test: mysqladmin ping -h localhost -u root --password=$$MYSQL_ROOT_PASSWORD
+    ports:
+      - "3307:3306"
+    networks:
+      - spring_oauth_social_login_network
+networks:
+  spring_oauth_social_login_network:
+    name: spring_oauth_social_login_network
+    ipam:
+      driver: default
+    external: false
