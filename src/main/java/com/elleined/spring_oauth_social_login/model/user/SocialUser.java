@@ -1,18 +1,10 @@
 package com.elleined.spring_oauth_social_login.model.user;
 
-import com.elleined.spring_oauth_social_login.model.authority.Authority;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 @Entity
 @Table(name = "tbl_social_user")
@@ -36,9 +28,6 @@ public class SocialUser extends User {
             updatable = false
     )
     private String nickname; // username
-
-    @ManyToMany(mappedBy = "socialUsers")
-    private Set<Authority> authorities;
 
     @Column(
             name = "provider",

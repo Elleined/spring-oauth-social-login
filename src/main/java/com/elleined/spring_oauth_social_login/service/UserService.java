@@ -1,4 +1,4 @@
-package com.elleined.spring_oauth_social_login.service.user;
+package com.elleined.spring_oauth_social_login.service;
 
 import com.elleined.spring_oauth_social_login.model.user.User;
 

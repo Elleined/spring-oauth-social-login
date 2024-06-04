@@ -1,17 +1,16 @@
-package com.elleined.spring_oauth_social_login.service.user.social;
+package com.elleined.spring_oauth_social_login.service.social;
 
+import com.elleined.spring_oauth_social_login.dto.authority.AuthorityDTO;
 import com.elleined.spring_oauth_social_login.exception.resource.ResourceNotFoundException;
+import com.elleined.spring_oauth_social_login.mapper.AuthorityMapper;
 import com.elleined.spring_oauth_social_login.mapper.UserMapper;
-import com.elleined.spring_oauth_social_login.model.authority.Authority;
 import com.elleined.spring_oauth_social_login.model.user.SocialUser;
 import com.elleined.spring_oauth_social_login.model.user.User;
-import com.elleined.spring_oauth_social_login.repository.user.SocialUserRepository;
-import com.elleined.spring_oauth_social_login.service.authority.AuthorityService;
+import com.elleined.spring_oauth_social_login.repository.SocialUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -22,17 +21,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Transactional
 @Service
 @Slf4j
 public class SocialUserServiceImpl implements SocialUserService {
-
-    private final AuthorityService<SocialUser> authorityService;
+    private final AuthorityMapper authorityMapper;
 
     private final SocialUserRepository userRepository;
     private final UserMapper userMapper;
@@ -41,9 +37,8 @@ public class SocialUserServiceImpl implements SocialUserService {
     private final OidcUserService oidcUserService;
 
     @Override
-    public SocialUser save(String email, String name, String image, String socialId, String nickname, Collection<? extends GrantedAuthority> authorities, SocialUser.Provider provider) {
-        SocialUser socialUser = userMapper.toEntity(email, name, image, socialId, nickname, authorities, provider);
-
+    public SocialUser save(String email, String name, String image, String socialId, String nickname, SocialUser.Provider provider) {
+        SocialUser socialUser = userMapper.toEntity(email, name, image, socialId, nickname, provider);
         userRepository.save(socialUser);
         log.debug("Saving social user success");
         return socialUser;
@@ -67,14 +62,20 @@ public class SocialUserServiceImpl implements SocialUserService {
             String image = oidcUser.getPicture();
             String socialId = oidcUser.getAttribute("id");
             String nickname = oidcUser.getPreferredUsername();
-            Collection<? extends GrantedAuthority> authorities = oidcUser.getAuthorities();
+            List<AuthorityDTO> authorityDTOS = oidcUser.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(authorityMapper::toDTO)
+                    .toList();
             SocialUser.Provider provider = getProvider(userRequest);
 
             // save the authorities
-            if (isEmailAlreadyExists(email))
-                return getByEmail(email);
+            if (isEmailAlreadyExists(email)) {
+                SocialUser socialUser = this.getByEmail(email);
+                userMapper.toDTO(socialUser, authorityDTOS);
+            }
 
-            return this.save(email, name, image, socialId, nickname, authorities, provider);
+            SocialUser socialUser = this.save(email, name, image, socialId, nickname, provider);
+            return userMapper.toDTO(socialUser, authorityDTOS);
         };
     }
 
@@ -96,13 +97,19 @@ public class SocialUserServiceImpl implements SocialUserService {
             String image = oAuth2User.getAttribute("avatar_url");
             String socialId = oAuth2User.getName();
             String nickname = oAuth2User.getAttribute("login");
-            Collection<? extends GrantedAuthority> authorities = oAuth2User.getAuthorities();
+            List<AuthorityDTO> authorityDTOS = oAuth2User.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(authorityMapper::toDTO)
+                    .toList();
             SocialUser.Provider provider = getProvider(userRequest);
 
-            if (isEmailAlreadyExists(email))
-                return this.getByEmail(email);
+            if (isEmailAlreadyExists(email)) {
+                SocialUser socialUser = this.getByEmail(email);
+                return userMapper.toDTO(socialUser, authorityDTOS);
+            }
 
-            return this.save(email, name, image, socialId, nickname, authorities, provider);
+            SocialUser socialUser = this.save(email, name, image, socialId, nickname, provider);
+            return userMapper.toDTO(socialUser, authorityDTOS);
         };
     }
 

@@ -1,7 +1,6 @@
 package com.elleined.spring_oauth_social_login.dto.user;
 
 import com.elleined.spring_oauth_social_login.dto.authority.AuthorityDTO;
-import com.elleined.spring_oauth_social_login.model.authority.Authority;
 import com.elleined.spring_oauth_social_login.model.user.SocialUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

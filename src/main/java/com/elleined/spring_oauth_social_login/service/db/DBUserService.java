@@ -1,7 +1,8 @@
-package com.elleined.spring_oauth_social_login.service.user.db;
+package com.elleined.spring_oauth_social_login.service.db;
 
+import com.elleined.spring_oauth_social_login.dto.user.DBUserDTO;
 import com.elleined.spring_oauth_social_login.model.user.DBUser;
-import com.elleined.spring_oauth_social_login.service.user.UserService;
+import com.elleined.spring_oauth_social_login.service.UserService;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -19,5 +20,5 @@ public interface DBUserService extends UserService<DBUser>, UserDetailsService {
     boolean isEmailAlreadyExists(String email);
 
     @Override
-    DBUser loadUserByUsername(String username) throws UsernameNotFoundException;
+    DBUserDTO loadUserByUsername(String username) throws UsernameNotFoundException;
 }
