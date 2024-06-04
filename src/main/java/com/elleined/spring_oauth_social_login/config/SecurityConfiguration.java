@@ -45,11 +45,12 @@ public class SecurityConfiguration {
                                             OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2LoginHandler,
                                             OAuth2UserService<OidcUserRequest, OidcUser> oidcLoginHandler) throws Exception {
         return http
-                .formLogin(Customizer.withDefaults())
+                .formLogin(c -> c.defaultSuccessUrl("/form-login/success"))
                 .oauth2Login(oc -> oc
                         .userInfoEndpoint(ui -> ui
                                 .userService(oauth2LoginHandler)
-                                .oidcUserService(oidcLoginHandler)))
+                                .oidcUserService(oidcLoginHandler))
+                        .defaultSuccessUrl("/social-login/success"))
                 .authorizeHttpRequests(c -> c.requestMatchers(EndpointRequest.to("info", "health", "prometheus")).permitAll()
                         .requestMatchers(EndpointRequest.toAnyEndpoint().excluding("info", "health", "prometheus")).hasAuthority("manage")
                         .requestMatchers("/", "/login", "/user/sign-up", "/error").permitAll()
@@ -89,6 +90,7 @@ public class SecurityConfiguration {
 //                                            OAuth2UserService<OidcUserRequest, OidcUser> oidcLoginHandler) throws Exception {
 //        return http
 //                .formLogin(c -> c.loginPage("/login")
+//                        .successHandler()
 //                        .loginProcessingUrl("/authenticate")
 //                        .usernameParameter("user")
 //                        .passwordParameter("pass")
