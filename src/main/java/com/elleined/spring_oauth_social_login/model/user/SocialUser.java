@@ -20,7 +20,7 @@ import java.util.Set;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class SocialUser extends User implements OidcUser {
+public class SocialUser extends User {
 
     @Column(
             name = "social_id",
@@ -47,26 +47,6 @@ public class SocialUser extends User implements OidcUser {
     )
     @Enumerated(EnumType.STRING)
     private Provider provider;
-
-    @Override
-    public Map<String, Object> getClaims() {
-        return Map.of();
-    }
-
-    @Override
-    public OidcUserInfo getUserInfo() {
-        return null;
-    }
-
-    @Override
-    public OidcIdToken getIdToken() {
-        return null;
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return new HashMap<>();
-    }
 
     public enum Provider {
         GITHUB, GOOGLE, FACEBOOK, TWITTER, INSTAGRAM

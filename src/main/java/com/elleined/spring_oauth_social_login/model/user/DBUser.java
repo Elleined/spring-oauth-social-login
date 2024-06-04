@@ -19,7 +19,7 @@ import java.util.Set;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class DBUser extends User implements UserDetails {
+public class DBUser extends User {
 
     @Column(
             name = "password",
@@ -29,14 +29,4 @@ public class DBUser extends User implements UserDetails {
 
     @ManyToMany(mappedBy = "dbUsers")
     private Set<Authority> authorities;
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return this.getEmail();
-    }
 }

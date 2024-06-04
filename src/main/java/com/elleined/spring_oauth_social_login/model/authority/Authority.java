@@ -18,7 +18,7 @@ import java.util.Set;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class Authority extends PrimaryKeyIdentity implements GrantedAuthority {
+public class Authority extends PrimaryKeyIdentity {
 
     @Column(
             name = "authority",
@@ -59,9 +59,4 @@ public class Authority extends PrimaryKeyIdentity implements GrantedAuthority {
             )
     )
     private Set<SocialUser> socialUsers;
-
-    @Override
-    public String getAuthority() {
-        return authority;
-    }
 }
