@@ -39,6 +39,9 @@ public class SocialUserServiceImpl implements SocialUserService {
     @Override
     public SocialUser save(String email, String name, String image, String socialId, String nickname, SocialUser.Provider provider) {
         SocialUser socialUser = userMapper.toEntity(email, name, image, socialId, nickname, provider);
+        if (!socialUser.getImage().equals(image))
+            socialUser.setImage(image);
+
         userRepository.save(socialUser);
         log.debug("Saving social user success");
         return socialUser;
@@ -68,7 +71,6 @@ public class SocialUserServiceImpl implements SocialUserService {
                     .toList();
             SocialUser.Provider provider = getProvider(userRequest);
 
-            // save the authorities
             if (isEmailAlreadyExists(email)) {
                 SocialUser socialUser = this.getByEmail(email);
                 userMapper.toDTO(socialUser, authorityDTOS);
